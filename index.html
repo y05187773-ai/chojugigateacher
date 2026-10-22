@@ -10,13 +10,14 @@
 <style>
 /* 案B「授業中モード型」（設計メモ/教師用コックピット_レイアウト案/）。色は児童用サイトとそろえる */
 :root {
-  --bg: #f3f1ec; --card: #fff; --ink: #222; --sub: #5d5d5d; --line: #ddd8cc;
+  --bg: #eceff1; --card: #fff; --ink: #23272b; --sub: #59616a; --line: #d4dade;
   --c1: #2f6fb5; --c1s: #e6effa;   /* ①〜④ 読んで見つける */
   --c2: #2e8b57; --c2s: #e3f3ea;   /* ⑤〜⑧ 材料を集める */
   --c3: #d9822b; --c3s: #fdf0e1;   /* ⑨⑩ 書いて伝える */
+  --c1d: #235a97; --c2d: #226b44; --c3d: #a45a14;   /* 淡い地の上の文字・濃い塗り */
   --accent: var(--c1); --accent-soft: var(--c1s); --warn: #b3261e; --warn-soft: #fde8e6;
   --ok: var(--c2); --ok-soft: var(--c2s); --mark: #fff4b8;
-  --pc: var(--c1); --ps: var(--c1s);   /* いま選んでいる時間の色 */
+  --pc: var(--c1); --ps: var(--c1s); --pd: var(--c1d);   /* いま選んでいる時間の色 */
   --top: 80px; --nav: 66px;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -37,7 +38,7 @@ header { position: fixed; top: 0; left: 0; right: 0; z-index: 30; background: #f
 .board { flex: 1; min-width: 0; display: flex; justify-content: center; overflow-x: auto; padding-top: 6px; scrollbar-width: none; }
 .board::-webkit-scrollbar { display: none; }
 .sq { flex: 0 0 auto; width: 74px; display: flex; flex-direction: column; align-items: center; position: relative; border: 0; background: none; padding: 0; min-height: 0; border-radius: 0; }
-.sq::before { content: ""; position: absolute; top: 17px; left: -37px; width: 74px; height: 4px; background: #d6d2c8; }
+.sq::before { content: ""; position: absolute; top: 17px; left: -37px; width: 74px; height: 4px; background: #cfd5da; }
 .sq:first-child::before { display: none; }
 .sq .n { width: 38px; height: 38px; border-radius: 50%; color: #fff; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; background: var(--q); }
 .sq .w { font-size: 11px; color: var(--sub); line-height: 1.3; margin-top: 2px; white-space: nowrap; }
@@ -46,7 +47,7 @@ header { position: fixed; top: 0; left: 0; right: 0; z-index: 30; background: #f
 .sq.on .n { width: 44px; height: 44px; margin-top: -3px; font-size: 19px; box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--q); }
 .sq.on .w { color: var(--ink); font-weight: 700; margin-top: 5px; }
 .q1 { --q: var(--c1); } .q2 { --q: var(--c2); } .q3 { --q: var(--c3); }
-.modesw { display: flex; background: #ebe8e1; border-radius: 999px; padding: 3px; flex: 0 0 auto; }
+.modesw { display: flex; background: #e4e8eb; border-radius: 999px; padding: 3px; flex: 0 0 auto; }
 .modesw button { border: 0; background: none; min-height: 40px; border-radius: 999px; padding: 2px 16px; font-weight: 700; color: var(--sub); }
 .modesw button.on { background: var(--pc); color: #fff; }
 .hd .mini { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 20px; padding: 2px 10px; border-radius: 8px; background: #eee; display: none; }
@@ -55,9 +56,10 @@ header { position: fixed; top: 0; left: 0; right: 0; z-index: 30; background: #f
 
 /* 下のタブ：親指で押す */
 nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
-nav.tabs .in { display: grid; grid-template-columns: repeat(6, 1fr); max-width: 1280px; margin: 0 auto; height: var(--nav); }
+nav.tabs .in { display: grid; grid-template-columns: repeat(7, 1fr); max-width: 1280px; margin: 0 auto; height: var(--nav); }
 nav.tabs button { border: 0; border-radius: 0; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 13px; color: var(--sub); min-height: var(--nav); padding: 4px 2px; }
-nav.tabs button .ic { font-size: 22px; line-height: 1; }
+nav.tabs button .ic { line-height: 0; }
+nav.tabs button .ic svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 nav.tabs button.on { color: var(--pc); font-weight: 700; box-shadow: inset 0 4px 0 var(--pc); }
 
 main { max-width: 1280px; margin: 0 auto; padding: calc(var(--top) + env(safe-area-inset-top) + 12px) 14px calc(var(--nav) + env(safe-area-inset-bottom) + 24px); }
@@ -69,20 +71,26 @@ h3 { font-size: 16px; margin: 12px 0 4px; color: var(--accent); }
 
 /* 今日の授業（授業中）：上＝時計と45分の帯／めあて／左＝いまの場面・右＝止まった子へ */
 .tl { display: grid; grid-template-columns: 210px minmax(0, 1fr) 170px; gap: 16px; align-items: center; background: #fff; border-radius: 16px; padding: 10px 14px; }
-.clock { font-size: 60px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.clock { font-family: "BIZ UDGothic", "BIZ UDPGothic", "Hiragino Sans", sans-serif; letter-spacing: -.02em; font-size: 64px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
 .nx { font-size: 14px; color: var(--sub); min-height: 1.5em; margin-top: 4px; }
 .nx b { color: var(--ink); font-size: 17px; font-variant-numeric: tabular-nums; }
-.line { position: relative; height: 66px; }
-.line .sc { position: absolute; top: 4px; height: 30px; border: 0; border-radius: 0; min-height: 0; padding: 0 0 0 5px; font-size: 11px; font-weight: 700; color: #fff; text-align: left; white-space: nowrap; overflow: hidden; line-height: 30px; background: var(--pc); opacity: .55; border-right: 2px solid #fff; }
-.line .sc.mk { opacity: 1; }
-.line .sc.cur { opacity: 1; outline: 3px solid var(--ink); outline-offset: -3px; z-index: 1; }
+.line { position: relative; height: 96px; }
+.line .sc { position: absolute; top: 18px; height: 58px; border: 0; border-radius: 0; min-height: 0; padding: 0 4px; font-size: 12.5px; font-weight: 700; line-height: 1.2; text-align: left; color: var(--pd); background: var(--ps); border-right: 2px solid #fff; overflow: hidden; display: flex; align-items: center; }
+.line .sc span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-all; }
+.line .sc.mk { background: var(--pd); color: #fff; }
+.line .sc.gap { font-weight: 400; }
+.line .sc.cur { outline: 3px solid var(--ink); outline-offset: -3px; z-index: 1; }
 .line .sc.sel { outline: 3px dashed var(--ink); outline-offset: -3px; z-index: 1; }
-.line .sc:first-child { border-radius: 8px 0 0 8px; }
-.line .sc.last { border-radius: 0 8px 8px 0; }
-.line .pt { position: absolute; top: 0; width: 3px; height: 38px; background: var(--warn); z-index: 2; }
-.line .lb { position: absolute; top: 40px; font-size: 11px; color: var(--sub); white-space: nowrap; transform: translateX(-2px); }
-.line .lb.pt2 { color: var(--warn); font-weight: 700; }
-.line .now { position: absolute; top: -2px; width: 4px; height: 42px; background: var(--ink); border-radius: 2px; z-index: 3; }
+.line .sc:first-of-type { border-radius: 8px 0 0 8px; }
+.line .sc.last { border-radius: 0 8px 8px 0; border-right: 0; }
+.line .past { position: absolute; top: 18px; left: 0; width: 0; height: 58px; background: rgba(35, 39, 43, .16); border-radius: 8px 0 0 8px; z-index: 2; pointer-events: none; }
+.line .pt { position: absolute; top: 2px; width: 3px; height: 74px; background: var(--warn); z-index: 3; pointer-events: none; }
+.line .pt b { position: absolute; top: -3px; left: 5px; font-size: 13px; line-height: 1.2; color: var(--warn); background: #fff; padding: 0 2px; font-variant-numeric: tabular-nums; }
+.line .tk { position: absolute; top: 80px; font-size: 11px; line-height: 1.2; color: var(--sub); transform: translateX(-50%); font-variant-numeric: tabular-nums; }
+.line .tk::before { content: ""; position: absolute; left: 50%; top: -4px; width: 1px; height: 4px; background: var(--sub); }
+.line .tk.t0 { transform: none; } .line .tk.t0::before { left: 0; }
+.line .tk.t45 { transform: translateX(-100%); } .line .tk.t45::before { left: auto; right: 0; }
+.line .now { position: absolute; top: 12px; width: 4px; height: 70px; background: var(--ink); border-radius: 2px; z-index: 4; pointer-events: none; }
 .go { width: 100%; min-height: 64px; font-size: 22px; font-weight: 700; border-radius: 14px; background: var(--pc); border-color: var(--pc); color: #fff; }
 .go.run { background: #fff; color: var(--pc); border: 3px solid var(--pc); }
 .tbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
@@ -105,17 +113,16 @@ h3 { font-size: 16px; margin: 12px 0 4px; color: var(--accent); }
 .nowc .nxt { border-top: 2px dashed var(--line); margin-top: 10px; padding-top: 6px; color: var(--sub); font-size: 15px; }
 .nowc .nxt b { color: var(--ink); }
 .nowc .back { margin-top: 8px; min-height: 40px; font-size: 14px; font-weight: 700; }
-.help { background: #fff; border-radius: 18px; padding: 10px 12px; }
+.help { background: #fff; border: 1px solid var(--line); border-top: 4px solid var(--warn); border-radius: 14px; padding: 10px 14px 12px; }
 .help h2 { color: var(--warn); font-size: 17px; }
-.help h3 { color: var(--sub); font-size: 13px; margin: 10px 0 4px; }
-.help details { border: 2px solid var(--line); border-radius: 12px; margin-bottom: 6px; }
-.help details > summary { list-style: none; padding: 6px 12px; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 16px; }
+.help h3 { color: var(--sub); font-size: 13px; margin: 12px 0 2px; }
+.help details { border-bottom: 1px solid var(--line); }
+.help details > summary { list-style: none; padding: 8px 4px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 16px; }
 .help details > summary::-webkit-details-marker { display: none; }
 .help details > summary::after { content: "›"; font-size: 20px; color: var(--sub); }
-.help details[open] { border-color: var(--warn); }
-.help details[open] > summary { background: var(--warn-soft); border-radius: 10px 10px 0 0; }
-.help details[open] > summary::after { content: "⌄"; }
-.help details .a { padding: 6px 12px 10px; background: var(--warn-soft); border-radius: 0 0 10px 10px; font-size: 16px; }
+.help details[open] > summary { color: var(--warn); }
+.help details[open] > summary::after { content: "⌄"; color: var(--warn); }
+.help details .a { padding: 8px 12px 10px; margin-bottom: 8px; background: var(--warn-soft); border-radius: 10px; font-size: 16px; }
 .help .yo { font-size: 15px; }
 
 .seg-ctl { position: sticky; top: calc(var(--top) + env(safe-area-inset-top) + 12px); z-index: 5; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; background: var(--bg); padding: 2px 0; }
@@ -135,14 +142,14 @@ table.flow .say { font-size: 15px; padding: 4px 10px; margin-top: 4px; }
 .tans .q { font-size: 14px; color: var(--warn); font-weight: 700; }
 table.tb { width: 100%; border-collapse: collapse; font-size: 15px; }
 table.tb th, table.tb td { border: 1px solid var(--line); padding: 8px; text-align: left; vertical-align: top; }
-table.tb th { background: #f1efea; }
+table.tb th { background: #eef1f3; }
 ul.chk { list-style: none; margin: 0; padding: 0; }
 ul.chk li { border-bottom: 1px dashed var(--line); }
 ul.chk label { display: flex; gap: 12px; align-items: flex-start; padding: 10px 4px; min-height: 52px; cursor: pointer; }
 ul.chk input { width: 26px; height: 26px; margin-top: 1px; flex: 0 0 auto; accent-color: var(--ok); }
 ul.chk li.done .t { color: var(--sub); text-decoration: line-through; }
 .tag { display: inline-block; font-size: 12px; border-radius: 4px; padding: 0 6px; margin-right: 6px; border: 1px solid var(--line); background: #f6f6f6; }
-code { font-size: 13px; background: #f1efea; border-radius: 4px; padding: 0 4px; word-break: break-all; }
+code { font-size: 13px; background: #eef1f3; border-radius: 4px; padding: 0 4px; word-break: break-all; }
 details > summary { cursor: pointer; font-weight: 700; padding: 10px 0; min-height: 44px; }
 
 /* 根拠 */
@@ -190,18 +197,39 @@ mark { background: var(--mark); outline: 2px solid #e0a800; }
 .toast { position: fixed; left: 50%; bottom: calc(var(--nav) + env(safe-area-inset-bottom) + 16px); transform: translateX(-50%); background: #1d1d1d; color: #fff; padding: 8px 8px 8px 18px; border-radius: 999px; z-index: 99; display: flex; gap: 10px; align-items: center; white-space: nowrap; }
 .toast button { min-height: 40px; background: #444; color: #fff; border: 0; border-radius: 999px; }
 
+/* ホーム：いまの時間（最後に開いた時間）を大きく。日付は使わない */
+.home-now { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; align-items: center; background: #fff; border: 1px solid var(--line); border-top: 6px solid var(--pc); border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; }
+.hn-l { display: flex; gap: 18px; align-items: flex-start; min-width: 0; }
+.hn-n { flex: 0 0 auto; width: 84px; height: 84px; border-radius: 50%; background: var(--pc); color: #fff; font-size: 44px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums; }
+.hn-k { font-size: 13px; font-weight: 700; color: var(--pd); }
+.home-now h1 { font-size: 28px; line-height: 1.3; margin: 0 0 8px; }
+.hn-m { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.5; background: var(--ps); border-left: 6px solid var(--pc); border-radius: 10px; padding: 6px 12px; }
+.hn-b { display: grid; gap: 8px; }
+.hn-b #hPrep { min-height: 64px; font-weight: 700; }
+.hn-b small, .hrow small { display: block; font-size: 13px; font-weight: 400; color: var(--sub); }
+.hrow { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.hrow:last-child { border-bottom: 0; }
+.hrow button { flex: 1; font-weight: 700; text-align: left; }
+.hkids { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; }
+.hkids .pill { margin: 0; font-size: 20px; font-weight: 700; min-width: 2.4em; text-align: center; }
+.hgoal { color: var(--sub); font-size: 15px; margin: 4px 4px 0; }
+.hgoal b { color: var(--ink); margin-right: 10px; }
+
 @media (max-width: 1000px) {
   .hd > b { display: none; }
   .sq { width: 60px; }
   .sq::before { left: -30px; width: 60px; }
 }
 @media (max-width: 900px) {
+  .home-now { grid-template-columns: 1fr; }
   .tl { grid-template-columns: 1fr 160px; }
   .tl .line { grid-column: 1 / -1; grid-row: 2; }
   .jg { grid-template-columns: 1fr; }
   .cols { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
+  .hn-n { width: 56px; height: 56px; font-size: 28px; }
+  .home-now h1 { font-size: 22px; }
   .sq .w { display: none; }
   .sq { width: 40px; }
   .sq::before { left: -20px; width: 40px; }
@@ -251,17 +279,17 @@ function toast(m, undo) {
 }
 
 /* ---------------- タブ・上のすごろく ---------------- */
-const TABS = [["today", "⏱", "今日の授業"], ["konkyo", "📖", "根拠の位置"], ["mitori", "🪑", "見取り"], ["ai", "🤖", "AIの下ごしらえ"], ["susumi", "📅", "進み具合"], ["set", "⚙️", "設定・保存"]];
-let tab = (location.hash.match(/tab=(\w+)/) || [])[1] || "today";
-if (!TABS.some(([k]) => k === tab)) tab = "today";
-let cur = (location.hash.match(/l=(\d+)/) || [])[1] || LESSONS.find((n) => S.dates[n] === today()) || "1";
+const TABS = [["home", '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-5h4v5"/></svg>', "ホーム"], ["today", '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>', "今日の授業"], ["konkyo", '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5c3-1 6-1 9 1v14c-3-2-6-2-9-1zM21 5c-3-1-6-1-9 1v14c3-2 6-2 9-1z"/></svg>', "根拠の位置"], ["mitori", '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="4" width="7" height="6" rx="1.5"/><rect x="3" y="14" width="7" height="6" rx="1.5"/><rect x="14" y="14" width="7" height="6" rx="1.5"/></svg>', "見取り"], ["ai", '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.5h6V4M8.5 10h7M8.5 14h7M8.5 18h4"/></svg>', "AIの下ごしらえ"], ["susumi", '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>', "進み具合"], ["set", '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>', "設定・保存"]];
+let tab = (location.hash.match(/tab=(\w+)/) || [])[1] || "home";
+if (!TABS.some(([k]) => k === tab)) tab = "home";
+let cur = (location.hash.match(/l=(\d+)/) || [])[1] || (LESSONS.includes(S.cur) ? S.cur : "") || LESSONS.find((n) => S.dates[n] === today()) || "1";
 let tmode = "jugyo"; /* jugyo＝授業中／junbi＝準備 */
 const phase = (n) => (+n <= 4 ? 1 : +n <= 8 ? 2 : 3);
 const SHORT = { 1: "見通し", 2: "絵と文章", 3: "見つける", 4: "えらぶ", 5: "材料①", 6: "材料②", 7: "材料③", 8: "構成", 9: "書く", 10: "読み合う" };
 const strip = (s) => String(s).replace(/<[^>]+>/g, "");
 function tabs() {
   const p = phase(cur), r = document.documentElement.style;
-  r.setProperty("--pc", `var(--c${p})`); r.setProperty("--ps", `var(--c${p}s)`);
+  r.setProperty("--pc", `var(--c${p})`); r.setProperty("--ps", `var(--c${p}s)`); r.setProperty("--pd", `var(--c${p}d)`);
   $("#tabsIn").innerHTML = TABS.map(([k, ic, v]) => `<button data-t="${k}" class="${k === tab ? "on" : ""}"><span class="ic">${ic}</span>${v}</button>`).join("");
   $("#board").innerHTML = LESSONS.map((n) => `<button class="sq q${phase(n)} ${n === cur ? "on" : ""} ${S.dates[n] === today() ? "today" : ""}" data-l="${n}"><span class="n">${n}</span><span class="w">${S.dates[n] ? md2(S.dates[n]) : SHORT[n]}</span></button>`).join("");
   $("#modesw").innerHTML = tab === "today" ? [["jugyo", "授業中"], ["junbi", "準備"]].map(([k, v]) => `<button data-mode="${k}" class="${tmode === k ? "on" : ""}">${v}</button>`).join("") : "";
@@ -270,13 +298,18 @@ function tabs() {
 $("#tabsIn").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; tab = b.dataset.t; closeEditor(); render(); });
 $("#board").addEventListener("click", (e) => {
   const b = e.target.closest("[data-l]"); if (!b || b.dataset.l === cur) return;
-  if (timer.run && !confirm("タイマーが動いています。時間を切りかえると0にもどります。よろしいですか。")) return;
-  cur = b.dataset.l; tsel = -1; scSel = -1; resetTimer();
-  if (tab !== "today" && tab !== "susumi") tab = "today";
+  if (!setCur(b.dataset.l)) return;
+  if (!["home", "today", "susumi"].includes(tab)) tab = "today";
   render();
 });
+/* いまの時間を切りかえる。日付を入れなくてもホームに出せるよう、最後に選んだ時間を覚えておく */
+function setCur(n) {
+  if (timer.run && !confirm("タイマーが動いています。時間を切りかえると0にもどります。よろしいですか。")) return false;
+  cur = n; S.cur = n; save(); tsel = -1; scSel = -1; resetTimer();
+  return true;
+}
 $("#modesw").addEventListener("click", (e) => { const b = e.target.closest("[data-mode]"); if (!b) return; tmode = b.dataset.mode; render(); });
-function render() { tabs(); ({ today: vToday, konkyo: vKonkyo, mitori: vMitori, ai: vAI, susumi: vSusumi, set: vSet })[tab](); window.scrollTo(0, 0); drawHeaderClock(); }
+function render() { tabs(); ({ home: vHome, today: vToday, konkyo: vKonkyo, mitori: vMitori, ai: vAI, susumi: vSusumi, set: vSet })[tab](); window.scrollTo(0, 0); drawHeaderClock(); }
 
 /* ---------------- 今日の授業 ---------------- */
 let timer = { start: 0, acc: 0, run: false, fired: {}, h: null };
@@ -336,18 +369,18 @@ function vJugyo() {
   $("#main").innerHTML = `
   <div class="tl">
     <div><div class="clock" id="clock">00:00</div><div class="nx" id="nx"></div></div>
-    <div class="line" id="line">${S2.list.map((x, i) => `<button class="sc ${x.mark ? "mk" : ""} ${i === S2.list.length - 1 ? "last" : ""}" data-sc="${i}" style="left:${x.a / 45 * 100}%;width:${(x.b - x.a) / 45 * 100}%;${x.gap ? "opacity:.3" : ""}">${esc(strip(x.name))}</button>`).join("")}
-      ${S2.pts.map((p) => `<div class="pt" style="left:calc(${p.a / 45 * 100}% - 1px)"></div>`).join("")}
-      ${marksFor(cur).filter((x) => x.al && x.at < 45).filter((x, i, a) => !a.slice(0, i).some((y) => x.at - y.at < 4)).map((x) => `<span class="lb ${S2.pts.some((p) => p.a === x.at) ? "pt2" : ""}" style="left:${x.at / 45 * 100}%">${x.at} ${esc(x.t.split(/[（「]/)[0].slice(0, 8))}</span>`).join("")}
+    <div class="line" id="line">${S2.list.map((x, i) => `<button class="sc ${x.mark ? "mk" : ""} ${x.gap ? "gap" : ""} ${i === S2.list.length - 1 ? "last" : ""}" data-sc="${i}" aria-label="${x.a}〜${x.b}分 ${esc(strip(x.name))}" style="left:${x.a / 45 * 100}%;width:${(x.b - x.a) / 45 * 100}%">${x.b - x.a < 3 || x.name === "（つづき）" ? "" : `<span>${esc(strip(x.name).split(/[（「]/)[0])}</span>`}</button>`).join("")}
+      <div class="past" id="past"></div>${S2.pts.map((p) => `<div class="pt" style="left:calc(${p.a / 45 * 100}% - 1px)"><b>${p.a}</b></div>`).join("")}
+      ${[0, 5, 10, 15, 20, 25, 30, 35, 40, 45].map((t) => `<span class="tk t${t}" style="left:${t / 45 * 100}%">${t}</span>`).join("")}
       <div class="now" id="nowLine" style="left:0"></div></div>
     <div><button class="go" id="tGo">はじめる</button>
-      <div class="tbtns"><button id="tReset">0にもどす</button><button id="tv">📺 テレビ</button></div></div>
+      <div class="tbtns"><button id="tReset">0にもどす</button><button id="tv">テレビ</button></div></div>
   </div>
   <div class="alert" id="alert"></div>
   <div class="meate"><small>${MARU[cur]} めあて</small>${meateOf(L)}</div>
   <div class="jg">
     <div id="nowc"></div>
-    <div class="help"><h2>🆘 止まった子へ（押すと手だて）</h2>${help || '<p class="sub">この時間の手だては「準備」の「止まった子へ」にあります。</p>'}</div>
+    <div class="help"><h2>止まった子へ（押すと手だて）</h2>${help || '<p class="sub">この時間の手だては「準備」の「止まった子へ」にあります。</p>'}</div>
   </div>`;
   $$("[data-sc]").forEach((b) => b.onclick = () => { scSel = +b.dataset.sc === scSel ? -1 : +b.dataset.sc; nowKey = ""; drawTimer(); });
   $("#tGo").onclick = () => (timer.run ? pauseTimer() : startTimer());
@@ -447,7 +480,7 @@ function drawTimer() {
   go.classList.toggle("run", timer.run);
   const nx = mk.find((x) => x.at > m);
   $("#nx").innerHTML = nx ? `次：${esc(nx.t.split(/[（「／、]/)[0].slice(0, 12))}まで <b>${mmss(nx.at - m)}</b>` : "";
-  $("#nowLine").style.left = `calc(${Math.min(m / 45, 1) * 100}% - 2px)`;
+  $("#nowLine").style.left = `calc(${Math.min(m / 45, 1) * 100}% - 2px)`; $("#past").style.width = `${Math.min(m / 45, 1) * 100}%`;
   let ci = S2.list.findIndex((x) => m >= x.a && m < x.b);
   if (ci < 0 && S2.list.length) ci = m >= 45 ? S2.list.length - 1 : 0;
   $$("[data-sc]").forEach((b) => { b.classList.toggle("cur", +b.dataset.sc === ci); b.classList.toggle("sel", +b.dataset.sc === scSel); });
@@ -592,7 +625,7 @@ function closeEditor() { sel = null; $("#editor").classList.remove("show"); }
 function backup() {
   S.lastSave = today(); save();
   download(`授業コックピット_記録_${today()}.json`, JSON.stringify(S, null, 1), "application/json");
-  if (tab === "mitori") vMitori(); else if (tab === "set") vSet();
+  if (tab === "mitori") vMitori(); else if (tab === "set") vSet(); else if (tab === "home") vHome();
 }
 function csv() {
   const head = ["番号", "関門①", "関門②", "関門③", "今いるところ", "関所", "選んだ型", "選び直し", "★", "メモ"];
@@ -669,6 +702,38 @@ function addSchoolDays(iso, k) {
   const d = new Date(iso + "T00:00:00"); let n = 0;
   while (n < k) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) n++; }
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+/* ---------------- ホーム ---------------- */
+function vHome() {
+  const L = D.lessons[cur], next = String(+cur + 1);
+  const prepKey = ["5", "6", "7"].includes(cur) ? "5" : cur;
+  const hasNext = D.prep[next] && next !== "6" && next !== "7";
+  const kk = kakekoho();
+  $("#main").innerHTML = `
+  <section class="home-now">
+    <div class="hn-l"><div class="hn-n">${cur}</div>
+      <div><div class="hn-k">いまの時間</div><h1>第${cur}時　${esc(D.student_titles[studentId(cur)] || "")}</h1>
+        <p class="hn-m">${meateOf(L)}</p></div></div>
+    <div class="hn-b"><button class="go" id="hGo">授業をはじめる</button>
+      <button id="hPrep">準備物を見る<small>${prepCount(prepKey)} 済み</small></button></div>
+  </section>
+  <div class="cols">
+    <div class="card"><h2>最初に回る子</h2>
+      ${kk.length ? `<div class="hkids">${kk.map((n) => `<span class="pill w">${n}</span>`).join("")}</div><p class="sub">第5〜7時の見取りから。関門②・③をまだ通っていない子と、★をつけた子です。</p>`
+        : '<p class="sub">見取りの記録がまだありません。第5〜7時のあとに「見取り」で記録すると、ここに番号が出ます。</p>'}</div>
+    <div class="card"><h2>授業のあとに</h2>
+      <div class="hrow"><button id="hBk">記録を書き出す<small>最後に書き出した日：${esc(S.lastSave ? md2(S.lastSave) : "まだ")}</small></button></div>
+      ${hasNext ? `<div class="hrow"><button id="hNext">${MARU[next]}までの準備<small>${prepCount(next)} 済み</small></button></div>` : ""}
+      ${LESSONS.includes(next) ? `<div class="hrow"><button id="hAdv">この時間をおえて ${MARU[next]} へ<small>ホームの「いまの時間」が${MARU[next]}になります</small></button></div>` : ""}
+    </div>
+  </div>
+  <p class="hgoal"><b>単元のゴール</b>${esc(D.goal)}</p>`;
+  const go = (mode, sg) => { tab = "today"; tmode = mode; if (sg) seg = sg; render(); };
+  $("#hGo").onclick = () => go("jugyo");
+  $("#hPrep").onclick = () => go("junbi", "junbi");
+  if ($("#hNext")) $("#hNext").onclick = () => go("junbi", "tsugi");
+  $("#hBk").onclick = backup;
+  if ($("#hAdv")) $("#hAdv").onclick = () => { if (setCur(next)) render(); };
 }
 function vSusumi() {
   const days = S.kokai ? Math.ceil((new Date(S.kokai + "T00:00:00") - new Date(today() + "T00:00:00")) / 86400000) : null;
